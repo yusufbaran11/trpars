@@ -1,0 +1,123 @@
+# YmY OS .gitignore
+
+# Build artifacts
+*.iso
+*.iso.sha256sum
+*.iso.md5sum
+*.checksum
+result/
+*.img
+
+# Log files
+*.log
+*.log.*
+/root/*.log
+
+# Temporary build directories
+/tmp/
+/build/
+/work/
+*.tmp/
+*.temp/
+
+# Lorax and Anaconda build files
+/lorax-*
+/anaconda-*
+/.buildstamp
+/images/
+/isolinux/
+/EFI/
+
+# Package files
+*.rpm
+*.deb
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.zip
+
+# Backup files
+*~
+*.bak
+*.backup
+*.old
+*.orig
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# Node (if web tools are used)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test files
+test-results/
+coverage/
+*.test
+
+# Documentation build files
+docs/_build/
+docs/.doctrees/
+
+# Cache directories
+.cache/
+*.cache
+
+# Mount points (for testing)
+/mnt/
+/media/
+
+# Downloaded repository data
+repos/
+*.repo
+
+# Kickstart generated files
+/ks-script-*
+/anaconda-ks.cfg
+
+# Local configuration (not to be shared)
+config/local.conf
+.env
+.env.local
+
+# Secrets and credentials
+*.key
+*.pem
+*.crt
+secrets/
+
+# Release drafts
+RELEASE_NOTES_DRAFT.md
+
+# Personal notes
+TODO.md
+NOTES.md
+personal/
