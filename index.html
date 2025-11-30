@@ -1,0 +1,178 @@
+<! DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="YmY OS 43 Beta - Fedora tabanlı, yeni başlayanlar için Linux dağıtımı">
+  <title>YmY OS 43 Beta - Fedora Tabanlı Linux</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: #f5f5f5;
+    }
+    header { 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 60px 20px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    header img { width: 150px; margin-bottom: 20px; }
+    h1 { font-size: 2.5em; margin-bottom: 10px; }
+    h2 { font-size: 1.5em; font-weight: 300; }
+    section { 
+      max-width: 900px; 
+      margin: 40px auto; 
+      padding: 40px 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h3 { color: #667eea; margin-bottom: 20px; font-size: 1.8em; }
+    p { margin-bottom: 15px; font-size: 1.1em; }
+    ul { margin-left: 20px; margin-bottom: 20px; }
+    li { margin-bottom: 10px; }
+    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+    .feature-box { 
+      padding: 20px;
+      background: #f9f9f9;
+      border-left: 4px solid #667eea;
+      border-radius: 4px;
+    }
+    form { max-width: 500px; margin: 20px 0; }
+    label { display: block; margin: 15px 0 5px 0; font-weight: bold; color: #333; }
+    input, textarea { 
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 1em;
+    }
+    input:focus, textarea:focus { outline: none; border-color: #667eea; box-shadow: 0 0 5px rgba(102, 126, 234, 0.3); }
+    button { 
+      background: #667eea;
+      color: white;
+      padding: 12px 30px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+    button:hover { background: #764ba2; }
+    . footer { 
+      background: #333;
+      color: white;
+      text-align: center;
+      padding: 30px 20px;
+      margin-top: 40px;
+    }
+    .footer a { color: #667eea; text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+    @media (prefers-color-scheme: dark) {
+      body { background: #1a1a1a; color: #f0f0f0; }
+      section { background: #2a2a2a; }
+      input, textarea { background: #333; color: #f0f0f0; border-color: #555; }
+      . feature-box { background: #333; }
+      h3 { color: #9fa3ff; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <picture>
+      <source srcset="ymy-logo-dark.png" media="(prefers-color-scheme: dark)">
+      <img src="ymy-logo-light.png" alt="YmY OS Logo">
+    </picture>
+    <h1>YmY OS 43 Beta</h1>
+    <h2>Fedora tabanlı, yeni başlayanlar için Linux</h2>
+  </header>
+
+  <section class="intro">
+    <h3>🎉 Hoş Geldiniz! </h3>
+    <p>YmY OS, Fedora 43 üzerine inşa edilen, özgür ve modern bir Linux dağıtımıdır. Özellikle Linux dünyasına yeni katılanlara kolay ve sorunsuz bir deneyim sunmayı hedefliyoruz.</p>
+    <p><strong>👥 Geliştirici Ekip:</strong> YmY Studios</p>
+    <p>
+      <a href="https://github.com/ymy-studios/ymy-os" target="_blank" style="background: #667eea; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block;">
+        GitHub Projesine Git →
+      </a>
+    </p>
+  </section>
+
+  <section class="features">
+    <h3 style="grid-column: 1/-1;">✨ Öne Çıkanlar</h3>
+    <div class="feature-box">
+      <h4>🚀 Kolay Kurulum</h4>
+      <p>Linux'a yeni başlayanlar için tasarlanan sade kurulum süreci</p>
+    </div>
+    <div class="feature-box">
+      <h4>🎨 Modern Arayüz</h4>
+      <p>Açık ve koyu mod uyumlu, profesyonel tasarım</p>
+    </div>
+    <div class="feature-box">
+      <h4>📚 Kapsamlı Dökümantasyon</h4>
+      <p>Adım adım rehberler ve video öğreticiler</p>
+    </div>
+    <div class="feature-box">
+      <h4>👨‍💻 Manuel Yönetim</h4>
+      <p>Otomatik build/release devredışı, kalite kontrollü güncellemeler</p>
+    </div>
+  </section>
+
+  <section class="contest">
+    <h3>🎨 YmY OS 43 Duvar Kağıdı Yarışması</h3>
+    <p>Dağıtımımızda kullanmak üzere benzersiz bir duvar kağıdı tasarlayın!  En iyi tasarımlar sonraki sürümlerde yer alacak ve tasarımcı adı anılacaktır.</p>
+    
+    <h4 style="margin-top: 30px; color: #667eea;">📋 Katılım Koşulları:</h4>
+    <ul>
+      <li>Minimum çözünürlük: 1920x1080 piksel</li>
+      <li>Format: PNG veya JPG</li>
+      <li>Özgün tasarım olmalı</li>
+      <li>YmY OS temasına uygun olmalı</li>
+    </ul>
+
+    <h4 style="color: #667eea;">📝 Katılım Formu:</h4>
+    <form>
+      <label for="designer">Adınız *</label>
+      <input type="text" id="designer" name="designer" required>
+      
+      <label for="email">E-posta *</label>
+      <input type="email" id="email" name="email" required>
+      
+      <label for="wallpaper">Tasarımınızın Açıklaması *</label>
+      <textarea id="wallpaper" name="wallpaper" rows="4" placeholder="Tasarımınızın ilham kaynağını ve özelliklerini açıklayın..." required></textarea>
+      
+      <label>📎 Tasarım Dosyasını E-posta ile Gönderin</label>
+      <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
+        Lütfen tasarım dosyasını <strong>wallpaper@ymyos.com</strong> adresine gönderin ve aşağıdaki bilgileri ekleyin. 
+      </p>
+      
+      <button type="submit">Katıl →</button>
+    </form>
+
+    <p style="margin-top: 20px; font-weight: bold;">🏆 Kazananlar toplulukta duyurulacaktır!</p>
+  </section>
+
+  <section>
+    <h3>📥 İndirme</h3>
+    <p>YmY OS 43 Beta'nın en son sürümünü indir:</p>
+    <a href="https://github.com/ymy-studios/ymy-os/releases" target="_blank" style="background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 4px; display: inline-block; margin-top: 10px;">
+      Releases Sayfasına Git
+    </a>
+  </section>
+
+  <footer class="footer">
+    <p>&copy; 2025 <strong>YmY Studios</strong> - Tüm hakları saklıdır</p>
+    <p style="margin-top: 15px;">
+      <a href="https://github.com/ymy-studios/ymy-os">GitHub</a> | 
+      <a href="mailto:info@ymyos.com">E-posta: info@ymyos.com</a>
+    </p>
+  </footer>
+</body>
+</html>
