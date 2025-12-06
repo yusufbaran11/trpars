@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YmY OS - Yeni Nesil Linux Dağıtımı</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
+        }
+        
+        .glow {
+            box-shadow: 0 0 60px rgba(99, 102, 241, 0.3);
+        }
+        
+        .text-glow {
+            text-shadow: 0 0 40px rgba(99, 102, 241, 0.5);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
+        }
+        
+        .pulse-slow {
+            animation: pulse-slow 3s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .float {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .countdown-box {
+            background: linear-gradient(145deg, #1e1e32, #2a2a45);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+        
+        .contest-gradient {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #a855f7 100%);
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen text-white">
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 bg-black/30 backdrop-blur-lg border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <img src="ymy-logo-dark.png" alt="YmY OS Logo" class="h-10 w-auto">
+                    <span class="text-xl font-bold">YmY OS</span>
+                </div>
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="#features" class="text-gray-300 hover:text-white transition">Özellikler</a>
+                    <a href="#contest" class="text-gray-300 hover:text-white transition">Yarışma</a>
+                    <a href="https://github.com/ymy-studios/ymy-os" target="_blank" class="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                        GitHub
+                    </a>
+                </div>
+                <button id="mobileMenuBtn" class="md:hidden text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="hidden md:hidden bg-black/50 backdrop-blur-lg border-t border-white/10">
+            <div class="px-6 py-4 space-y-4">
+                <a href="#features" class="block text-gray-300 hover:text-white transition">Özellikler</a>
+                <a href="#contest" class="block text-gray-300 hover:text-white transition">Yarışma</a>
+                <a href="https://github.com/ymy-studios/ymy-os" target="_blank" class="flex items-center gap-2 text-gray-300 hover:text-white transition">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    GitHub
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="min-h-screen flex items-center justify-center px-6 pt-20">
+        <div class="max-w-4xl mx-auto text-center">
+            <div class="float mb-8">
+                <img src="ymy-logo-dark.png" alt="YmY OS Logo" class="h-32 md:h-48 w-auto mx-auto glow rounded-3xl">
+            </div>
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 text-glow">
+                YmY <span class="text-indigo-400">OS</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-300 mb-4">
+                Fedora 43 tabanlı, yeni başlayanlar için tasarlanmış Linux dağıtımı
+            </p>
+            <div class="flex flex-wrap justify-center gap-3 mb-8">
+                <span class="bg-blue-500/20 border border-blue-500/40 text-blue-300 px-4 py-2 rounded-full text-sm font-medium">🎩 Fedora 43 Tabanlı</span>
+                <span class="bg-purple-500/20 border border-purple-500/40 text-purple-300 px-4 py-2 rounded-full text-sm font-medium">🦶 GNOME Masaüstü</span>
+                <span class="bg-green-500/20 border border-green-500/40 text-green-300 px-4 py-2 rounded-full text-sm font-medium">🚀 Yeni Başlayanlar İçin</span>
+            </div>
+            
+            <!-- Coming Soon Badge -->
+            <div class="inline-flex items-center gap-2 bg-indigo-500/20 border border-indigo-500/50 rounded-full px-6 py-3 mb-12">
+                <span class="w-3 h-3 bg-indigo-400 rounded-full pulse-slow"></span>
+                <span class="text-indigo-300 font-semibold text-lg">Çok Yakında</span>
+            </div>
+            
+            <!-- CTA Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="https://github.com/ymy-studios/ymy-os" target="_blank" class="bg-indigo-600 hover:bg-indigo-700 px-8 py-4 rounded-xl font-semibold transition flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    GitHub'da Takip Et
+                </a>
+                <a href="#contest" class="bg-white/10 hover:bg-white/20 border border-white/20 px-8 py-4 rounded-xl font-semibold transition">
+                    Yarışmaya Katıl
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-24 px-6">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-bold text-center mb-4">Neden <span class="text-indigo-400">YmY OS</span>?</h2>
+            <p class="text-gray-400 text-center mb-16 max-w-2xl mx-auto">Modern teknolojilerle tasarlanmış, kullanıcı deneyimini ön planda tutan yeni nesil Linux dağıtımı</p>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Feature 1 - Fedora -->
+                <div class="card-hover bg-white/5 border border-white/10 rounded-2xl p-8">
+                    <div class="w-14 h-14 bg-blue-500/20 rounded-xl flex items-center justify-center mb-6">
+                        <span class="text-3xl">🎩</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Fedora 43 Tabanlı</h3>
+                    <p class="text-gray-400">Güçlü ve güncel Fedora 43 altyapısı ile en son teknolojilere ve güncellemelere anında erişin.</p>
+                </div>
+                
+                <!-- Feature 2 - GNOME -->
+                <div class="card-hover bg-white/5 border border-white/10 rounded-2xl p-8">
+                    <div class="w-14 h-14 bg-purple-500/20 rounded-xl flex items-center justify-center mb-6">
+                        <span class="text-3xl">🦶</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">GNOME Masaüstü</h3>
+                    <p class="text-gray-400">Modern ve şık GNOME masaüstü ortamı, hazır eklentiler ve ön ayarlarla geliştirilmiş kullanıcı deneyimi.</p>
+                </div>
+                
+                <!-- Feature 3 - Beginners -->
+                <div class="card-hover bg-white/5 border border-white/10 rounded-2xl p-8">
+                    <div class="w-14 h-14 bg-green-500/20 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Yeni Başlayanlar İçin</h3>
+                    <p class="text-gray-400">Linux'a yeni geçenler için özel olarak tasarlandı. Kolay kurulum, anlaşılır arayüz ve rehberler.</p>
+                </div>
+                
+                <!-- Feature 4 - Extensions -->
+                <div class="card-hover bg-white/5 border border-white/10 rounded-2xl p-8">
+                    <div class="w-14 h-14 bg-orange-500/20 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Hazır Eklentiler</h3>
+                    <p class="text-gray-400">GNOME eklentileri ve ön ayarlar önceden yüklenmiş. Kurulumdan sonra hemen kullanmaya başlayın.</p>
+                </div>
+                
+                <!-- Feature 5 - Community -->
+                <div class="card-hover bg-white/5 border border-white/10 rounded-2xl p-8">
+                    <div class="w-14 h-14 bg-pink-500/20 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Topluluk Destekli</h3>
+                    <p class="text-gray-400">Aktif ve yardımsever Türkçe topluluk. Sorularınız için her zaman destek alabilirsiniz.</p>
+                </div>
+                
+                <!-- Feature 6 - Open Source -->
+                <div class="card-hover bg-white/5 border border-white/10 rounded-2xl p-8">
+                    <div class="w-14 h-14 bg-cyan-500/20 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Açık Kaynak</h3>
+                    <p class="text-gray-400">Tamamen açık kaynak kodlu. Katkıda bulunun, geliştirin, özgürce kullanın.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Wallpaper Contest Section -->
+    <section id="contest" class="py-24 px-6">
+        <div class="max-w-4xl mx-auto">
+            <div class="contest-gradient rounded-3xl p-1">
+                <div class="bg-[#0f0f1a] rounded-3xl p-8 md:p-12">
+                    <div class="text-center mb-10">
+                        <div class="inline-flex items-center gap-2 bg-white/10 rounded-full px-4 py-2 mb-6">
+                            <span class="text-2xl">🎨</span>
+                            <span class="font-semibold">Yarışma</span>
+                        </div>
+                        <h2 class="text-4xl md:text-5xl font-bold mb-4">Duvar Kağıdı Yarışması</h2>
+                        <p class="text-gray-300 text-lg max-w-2xl mx-auto">
+                            YmY OS'un varsayılan duvar kağıdını sen tasarla! Kazanan tasarım, YmY OS ile birlikte milyonlarca kullanıcıya ulaşacak.
+                        </p>
+                    </div>
+                    
+                    <!-- Contest Details -->
+                    <div class="grid md:grid-cols-2 gap-6 mb-10">
+                        <div class="bg-white/5 rounded-xl p-6">
+                            <h4 class="font-bold text-lg mb-4 flex items-center gap-2">
+                                <span class="text-2xl">📋</span> Kurallar
+                            </h4>
+                            <ul class="space-y-3 text-gray-300">
+                                <li class="flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-indigo-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    Minimum çözünürlük: 3840x2160 (4K)
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-indigo-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    Orijinal ve telif hakkı sorunu olmayan tasarımlar
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-indigo-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    YmY OS temasına uygun renk paleti
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-indigo-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    PNG veya JPG formatında
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-white/5 rounded-xl p-6">
+                            <h4 class="font-bold text-lg mb-4 flex items-center gap-2">
+                                <span class="text-2xl">🏆</span> Ödüller
+                            </h4>
+                            <ul class="space-y-3 text-gray-300">
+                                <li class="flex items-start gap-2">
+                                    <span class="text-yellow-400 font-bold">1.</span>
+                                    Varsayılan duvar kağıdı + İsim kredisi
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <span class="text-gray-300 font-bold">2.</span>
+                                    Alternatif duvar kağıdı koleksiyonunda yer alma
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <span class="text-orange-400 font-bold">3.</span>
+                                    Alternatif duvar kağıdı koleksiyonunda yer alma
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <span class="text-indigo-400">✨</span>
+                                    Tüm katılımcılara özel rozet
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Submit Form -->
+                    <div class="bg-white/5 rounded-xl p-6 md:p-8">
+                        <h4 class="font-bold text-xl mb-6 text-center">Yarışmaya Katıl</h4>
+                        <form id="contestForm" action="https://formspree.io/f/xpwvledk" method="POST" class="space-y-4">
+                            <input type="hidden" name="_subject" value="YmY OS - Yeni Yarışma Başvurusu!">
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <input type="text" name="name" placeholder="Adınız" required class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 transition">
+                                <input type="email" name="email" placeholder="E-posta adresiniz" required class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 transition">
+                            </div>
+                            <input type="url" name="design_link" placeholder="Tasarım linki (Google Drive, Dropbox, vb.)" required class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 transition">
+                            <textarea name="description" placeholder="Tasarımınız hakkında kısa açıklama..." rows="3" class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 transition resize-none"></textarea>
+                            <button type="submit" class="w-full contest-gradient hover:opacity-90 py-4 rounded-xl font-bold text-lg transition">
+                                Başvuru Gönder
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter Section -->
+    <section class="py-24 px-6 border-t border-white/10">
+        <div class="max-w-2xl mx-auto text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">Gelişmelerden Haberdar Ol</h2>
+            <p class="text-gray-400 mb-8">YmY OS yayınlandığında ilk siz öğrenin. Spam göndermiyoruz, söz!</p>
+            <form id="newsletterForm" action="https://formspree.io/f/xgvgzbkp" method="POST" class="flex flex-col sm:flex-row gap-4">
+                <input type="email" name="email" placeholder="E-posta adresiniz" required class="flex-1 bg-white/10 border border-white/20 rounded-xl px-6 py-4 focus:outline-none focus:border-indigo-500 transition">
+                <input type="hidden" name="_subject" value="YmY OS - Yeni Abone!">
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 px-8 py-4 rounded-xl font-semibold transition whitespace-nowrap">
+                    Abone Ol
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/10 py-12 px-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="flex items-center gap-3">
+                    <img src="ymy-logo-dark.png" alt="YmY OS Logo" class="h-8 w-auto">
+                    <span class="text-lg font-bold">YmY OS</span>
+                </div>
+                <div class="flex items-center gap-6">
+                    <a href="https://github.com/ymy-studios/ymy-os" target="_blank" class="text-gray-400 hover:text-white transition" title="GitHub">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    </a>
+                    <a href="https://youtube.com/@ymystudios60?si=I8tb_zhC0FKNcL_v" target="_blank" class="text-gray-400 hover:text-red-500 transition" title="YouTube">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                    </a>
+                    <a href="mailto:yusufbaran1160@proton.me" class="text-gray-400 hover:text-indigo-400 transition" title="E-posta">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    </a>
+                </div>
+                <p class="text-gray-500 text-sm">
+                    © 2025 YmY Studios. Tüm hakları saklıdır.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-center justify-center p-6">
+        <div class="bg-[#1a1a2e] border border-white/10 rounded-2xl p-8 max-w-md w-full text-center">
+            <div class="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg class="w-10 h-10 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+            </div>
+            <h3 class="text-2xl font-bold mb-2">Başarılı!</h3>
+            <p id="modalMessage" class="text-gray-400 mb-6">İşleminiz başarıyla tamamlandı.</p>
+            <button onclick="closeModal()" class="bg-indigo-600 hover:bg-indigo-700 px-6 py-3 rounded-xl font-semibold transition">
+                Tamam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Modal functions
+        function showModal(message) {
+            document.getElementById('modalMessage').textContent = message;
+            document.getElementById('successModal').classList.remove('hidden');
+            document.getElementById('successModal').classList.add('flex');
+        }
+        
+        function closeModal() {
+            document.getElementById('successModal').classList.add('hidden');
+            document.getElementById('successModal').classList.remove('flex');
+        }
+
+        // Contest form submission
+        document.getElementById('contestForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            showModal('Başvurunuz alındı! En kısa sürede sizinle iletişime geçeceğiz.');
+            e.target.reset();
+        });
+
+        // Newsletter form submission
+        document.getElementById('newsletterForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            showModal('Abone oldunuz! YmY OS yayınlandığında ilk sizin haberiniz olacak.');
+            e.target.reset();
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                    // Close mobile menu if open
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
