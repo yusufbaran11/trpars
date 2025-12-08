@@ -48,10 +48,8 @@ jobs:
         sudo chroot build/chroot apt-get install -y \
           linux-image-amd64 \
           linux-headers-amd64 \
-          grub-pc \
-          grub-efi-amd64 \
-          grub-efi-amd64-signed \
-          shim-signed \
+          grub-pc-bin \
+          grub-efi-amd64-bin \
           efibootmgr
     
     - name: Masaüstü ortamını kur (Cinnamon)
@@ -78,13 +76,13 @@ jobs:
           blender \
           audacity \
           gedit \
-          file-manager \
           nautilus \
           gdebi \
           synaptic \
           gparted \
           htop \
-          neofetch
+          neofetch \
+          --no-install-recommends
     
     - name: Cinnamon eklentileri kur
       run: |
@@ -163,9 +161,12 @@ jobs:
     
     - name: İzinleri düzelt ve temizle
       run: |
+        sudo chroot build/chroot apt-get install -f -y
         sudo chroot build/chroot apt-get autoremove -y
+        sudo chroot build/chroot apt-get autoclean -y
         sudo chroot build/chroot apt-get clean -y
         sudo find build/chroot/var/log -type f -name "*.log" -exec sudo rm {} \;
+        sudo find build/chroot/tmp -type f -delete
     
     - name: Squashfs imajını oluştur
       run: |
