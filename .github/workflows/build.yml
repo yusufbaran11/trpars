@@ -96,15 +96,10 @@ jobs:
     - name: Türkçe dil desteği ekle
       run: |
         sudo chroot build/chroot apt-get install -y \
-          language-pack-tr \
-          language-pack-gnome-tr \
           fonts-liberation \
           fonts-dejavu \
           fonts-noto \
-          hunspell-tr \
-          mythes-tr \
-          wamerican-small \
-          aspell-tr
+          locales
     
     - name: Cinnamon ön ayarlarını yapılandır
       run: |
@@ -133,6 +128,12 @@ jobs:
         user-session=cinnamon
         greeter-session=lightdm-gtk-greeter
         EOF
+    
+    - name: Türkçe Locale yapılandırması
+      run: |
+        sudo chroot build/chroot sed -i 's/^# tr_TR.UTF-8/tr_TR.UTF-8/' /etc/locale.gen
+        sudo chroot build/chroot locale-gen tr_TR.UTF-8
+        sudo chroot build/chroot update-locale LANG=tr_TR.UTF-8
     
     - name: Varsayılan kullanıcı oluştur
       run: |
