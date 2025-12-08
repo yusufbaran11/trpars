@@ -37,7 +37,13 @@ jobs:
         run: echo "trpars" | sudo tee build/chroot/etc/hostname > /dev/null
       
       - name: LightDM config
-        run: sudo mkdir -p build/chroot/etc/lightdm/lightdm.conf.d && sudo bash -c 'echo "[General]" > build/chroot/etc/lightdm/lightdm.conf.d/01_trpars.conf && echo "session=cinnamon" >> build/chroot/etc/lightdm/lightdm.conf.d/01_trpars.conf && echo "autologin-user=trpars" >> build/chroot/etc/lightdm/lightdm.conf.d/01_trpars.conf'
+        run: |
+          sudo mkdir -p build/chroot/etc/lightdm/lightdm.conf.d
+          sudo tee build/chroot/etc/lightdm/lightdm.conf.d/01_trpars.conf > /dev/null << 'LIGHTDMEOF'
+          [General]
+          session=cinnamon
+          autologin-user=trpars
+          LIGHTDMEOF
       
       - name: Temizle
         run: sudo chroot build/chroot apt-get autoremove -y && sudo chroot build/chroot apt-get clean -y
@@ -49,14 +55,15 @@ jobs:
         run: sudo cp build/chroot/boot/vmlinuz-* build/iso/boot/vmlinuz 2>/dev/null || true && sudo cp build/chroot/boot/initrd.img-* build/iso/boot/initrd.img 2>/dev/null || true && sudo chown -R $USER:$USER build/iso/
       
       - name: GRUB config oluştur
-        run: bash -c 'cat > build/iso/boot/grub/grub.cfg << "GRUBEOF"
-set default=0
-set timeout=5
-menuentry "TRPars 26.0 Beta" {
-  linux /boot/vmlinuz boot=live live-media-path=/live
-  initrd /boot/initrd.img
-}
-GRUBEOF'
+        run: |
+          tee build/iso/boot/grub/grub.cfg > /dev/null << 'GRUBEOF'
+          set default=0
+          set timeout=5
+          menuentry "TRPars 26.0 Beta" {
+            linux /boot/vmlinuz boot=live live-media-path=/live
+            initrd /boot/initrd.img
+          }
+          GRUBEOF
       
       - name: ISO oluştur
         run: xorriso -as mkisofs -iso-level 3 -c boot.cat -b boot/grub/grub.cfg -no-emul-boot -boot-load-size 4 -boot-info-table -output output/TRPars-26.0-Beta-amd64.iso build/iso/
@@ -65,31 +72,32 @@ GRUBEOF'
         run: cd output && sha256sum TRPars-26.0-Beta-amd64.iso > TRPars-26.0-Beta-amd64.iso.sha256
       
       - name: Info dosyası oluştur
-        run: cat > output/README.txt << "EOF"
-TRPars 26.0 Beta
-================
-
-Dağıtım: Debian 13.2 Tabanlı
-Masaüstü: Cinnamon
-Amaç: Linux'a yeni geçenlere kolaylık sağlamak
-
-Kurulu Yazılımlar:
-- Chromium (Web tarayıcı)
-- Thunderbird (E-posta)
-- LibreOffice (Ofis)
-- VLC (Video)
-- GIMP (Resim düzenleyici)
-- Audacity (Ses düzenleyici)
-- Gparted (Disk bölümlendirme)
-
-Varsayılan Kullanıcı: trpars
-Şifre: trpars
-
-Kurulum:
-1. USB'ye yazın: sudo dd if=TRPars-26.0-Beta-amd64.iso of=/dev/sdX bs=4M
-2. USB'den boot edin
-3. "Sisteme Kur"'ı tıklayın
-EOF
+        run: |
+          tee output/README.txt > /dev/null << 'READMEEOF'
+          TRPars 26.0 Beta
+          ================
+          
+          Dağıtım: Debian 13.2 Tabanlı
+          Masaüstü: Cinnamon
+          Amaç: Linux'a yeni geçenlere kolaylık sağlamak
+          
+          Kurulu Yazılımlar:
+          - Chromium (Web tarayıcı)
+          - Thunderbird (E-posta)
+          - LibreOffice (Ofis)
+          - VLC (Video)
+          - GIMP (Resim düzenleyici)
+          - Audacity (Ses düzenleyici)
+          - Gparted (Disk bölümlendirme)
+          
+          Varsayılan Kullanıcı: trpars
+          Şifre: trpars
+          
+          Kurulum:
+          1. USB'ye yazın: sudo dd if=TRPars-26.0-Beta-amd64.iso of=/dev/sdX bs=4M
+          2. USB'den boot edin
+          3. Sisteme Kur
+          READMEEOF
       
       - name: Artifacts upload
         uses: actions/upload-artifact@v4
@@ -99,4 +107,4 @@ EOF
           retention-days: 90
       
       - name: Özet
-        run: echo "✅ Build tamamlandı! Artifacts'dan indirin."
+        run: echo "✅ Build tamamlandı!"
