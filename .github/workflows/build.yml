@@ -120,14 +120,15 @@ jobs:
     
     - name: LightDM yapılandırması
       run: |
+        sudo mkdir -p build/chroot/etc/lightdm/lightdm.conf.d
         sudo tee build/chroot/etc/lightdm/lightdm.conf.d/01_trpars.conf > /dev/null << 'EOF'
-        [General]
-        session=cinnamon
-        autologin-user=trpars
-        autologin-user-timeout=0
-        user-session=cinnamon
-        greeter-session=lightdm-gtk-greeter
-        EOF
+[General]
+session=cinnamon
+autologin-user=trpars
+autologin-user-timeout=0
+user-session=cinnamon
+greeter-session=lightdm-gtk-greeter
+EOF
     
     - name: Türkçe Locale yapılandırması
       run: |
