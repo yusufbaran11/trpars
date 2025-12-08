@@ -68,12 +68,15 @@ jobs:
     - name: Temel uygulama ve araçları kur
       run: |
         sudo chroot build/chroot apt-get install -y \
-          firefox \
+          chromium \
+          chromium-l10n \
           thunderbird \
+          thunderbird-l10n \
           libreoffice \
+          libreoffice-l10n-tr \
           vlc \
           gimp \
-          blender \
+          gimp-l10n \
           audacity \
           gedit \
           nautilus \
@@ -81,7 +84,9 @@ jobs:
           synaptic \
           gparted \
           htop \
-          neofetch \
+          curl \
+          wget \
+          git \
           --no-install-recommends
     
     - name: Cinnamon eklentileri kur
@@ -255,13 +260,12 @@ jobs:
         
         Ofis Uygulamaları:
         ✓ LibreOffice (Writer, Calc, Impress)
-        ✓ Firefox (Web tarayıcısı)
+        ✓ Chromium (Web tarayıcısı - Firefox'un alternatifi)
         ✓ Thunderbird (E-posta istemcisi)
         
         Multimedya:
         ✓ VLC (Video oynatıcı)
         ✓ GIMP (Resim düzenleyici)
-        ✓ Blender (3D modelleme)
         ✓ Audacity (Ses düzenleyici)
         
         Sistem Araçları:
@@ -269,7 +273,7 @@ jobs:
         ✓ Synaptic (Paket yöneticisi)
         ✓ GDebi (Deb paketi yükleyici)
         ✓ Htop (Sistem izleyici)
-        ✓ Neofetch (Sistem bilgileri)
+        ✓ Curl, Wget, Git (Terminal araçları)
         
         Dil Desteği:
         ✓ Türkçe tam dil desteği
