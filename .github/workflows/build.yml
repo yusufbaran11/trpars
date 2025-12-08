@@ -69,14 +69,10 @@ jobs:
       run: |
         sudo chroot build/chroot apt-get install -y \
           chromium \
-          chromium-l10n \
           thunderbird \
-          thunderbird-l10n \
           libreoffice \
-          libreoffice-l10n-tr \
           vlc \
           gimp \
-          gimp-l10n \
           audacity \
           gedit \
           nautilus \
@@ -106,7 +102,9 @@ jobs:
           fonts-dejavu \
           fonts-noto \
           hunspell-tr \
-          mythes-tr
+          mythes-tr \
+          wamerican-small \
+          aspell-tr
     
     - name: Cinnamon ön ayarlarını yapılandır
       run: |
