@@ -25,7 +25,7 @@ jobs:
         run: sudo chroot build/chroot apt-get install -y cinnamon lightdm lightdm-gtk-greeter xserver-xorg
       
       - name: Uygulamalar kur
-        run: sudo chroot build/chroot apt-get install -y chromium thunderbird libreoffice vlc gimp audacity gedit nautilus gparted synaptic htop curl wget git fonts-liberation fonts-dejavu fonts-noto locales
+        run: sudo chroot build/chroot apt-get install -y chromium thunderbird vlc gedit nautilus gparted synaptic htop curl wget git fonts-liberation fonts-dejavu fonts-noto locales
       
       - name: Locale ayarla
         run: sudo chroot build/chroot sed -i 's/^# tr_TR.UTF-8/tr_TR.UTF-8/' /etc/locale.gen && sudo chroot build/chroot locale-gen tr_TR.UTF-8
@@ -84,11 +84,11 @@ jobs:
           Kurulu Yazılımlar:
           - Chromium (Web tarayıcı)
           - Thunderbird (E-posta)
-          - LibreOffice (Ofis)
-          - VLC (Video)
-          - GIMP (Resim düzenleyici)
-          - Audacity (Ses düzenleyici)
+          - VLC (Video oynatıcı)
           - Gparted (Disk bölümlendirme)
+          - Gedit (Metin editörü)
+          - Nautilus (Dosya yöneticisi)
+          - Synaptic (Paket yöneticisi)
           
           Varsayılan Kullanıcı: trpars
           Şifre: trpars
