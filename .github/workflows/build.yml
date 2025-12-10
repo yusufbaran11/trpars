@@ -54,19 +54,7 @@ jobs:
       - name: Boot dosyaları kopyala
         run: sudo cp build/chroot/boot/vmlinuz-* build/iso/boot/vmlinuz 2>/dev/null || true && sudo cp build/chroot/boot/initrd.img-* build/iso/boot/initrd.img 2>/dev/null || true && sudo chown -R $USER:$USER build/iso/
       
-      - name: GRUB config oluştur
-        run: |
-          tee build/iso/boot/grub/grub.cfg > /dev/null << 'GRUBEOF'
-          set default=0
-          set timeout=5
-          menuentry "TRPars 26.0 Beta" {
-            linux /boot/vmlinuz boot=live live-media-path=/live
-            initrd /boot/initrd.img
-          }
-          GRUBEOF
-      
-      - name: ISO oluştur
-        run: xorriso -as mkisofs -iso-level 3 -c boot.cat -b boot/grub/grub.cfg -no-emul-boot -boot-load-size 4 -boot-info-table -output output/TRPars-26.0-Beta-amd64.iso build/iso/
+grub.cfg -no-emul-boot -boot-load-size 4 -boot-info-table -output output/TRPars-26.0-Beta-amd64.iso build/iso/
       
       - name: Checksum oluştur
         run: cd output && sha256sum TRPars-26.0-Beta-amd64.iso > TRPars-26.0-Beta-amd64.iso.sha256
