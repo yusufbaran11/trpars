@@ -10,10 +10,10 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Paketler yükle
-        run: sudo apt-get update && sudo apt-get install -y debootstrap squashfs-tools xorriso
+        run: sudo apt-get update && sudo apt-get install -y debootstrap squashfs-tools xorriso isolinux syslinux
       
       - name: Dizinler oluştur
-        run: mkdir -p build/chroot build/iso/boot/grub build/iso/live output
+        run: mkdir -p build/chroot build/iso/boot/grub build/iso/live build/iso/isolinux output
       
       - name: Debian rootfs oluştur
         run: sudo debootstrap --arch amd64 --variant=minbase trixie build/chroot http://deb.debian.org/debian
@@ -37,55 +37,129 @@ jobs:
         run: echo "trpars" | sudo tee build/chroot/etc/hostname > /dev/null
       
       - name: LightDM config
-        run: |
-          sudo mkdir -p build/chroot/etc/lightdm/lightdm.conf.d
-          sudo tee build/chroot/etc/lightdm/lightdm.conf.d/01_trpars.conf > /dev/null << 'LIGHTDMEOF'
-          [General]
-          session=cinnamon
-          autologin-user=trpars
-          LIGHTDMEOF
+        run: sudo mkdir -p build/chroot/etc/lightdm/lightdm.conf.d && sudo bash -c 'cat > build/chroot/etc/lightdm/lightdm.conf.d/01_trpars.conf << EOL
+[General]
+session=cinnamon
+autologin-user=trpars
+EOL'
       
       - name: Temizle
-        run: sudo chroot build/chroot apt-get autoremove -y && sudo chroot build/chroot apt-get clean -y
+        run: sudo chroot build/chroot apt-get autoremove -y && sudo chroot build/chroot apt-get autoclean -y && sudo chroot build/chroot apt-get clean -y
       
       - name: Squashfs oluştur
         run: sudo mksquashfs build/chroot build/iso/live/filesystem.squashfs -comp xz -e boot
       
       - name: Boot dosyaları kopyala
-        run: sudo cp build/chroot/boot/vmlinuz-* build/iso/boot/vmlinuz 2>/dev/null || true && sudo cp build/chroot/boot/initrd.img-* build/iso/boot/initrd.img 2>/dev/null || true && sudo chown -R $USER:$USER build/iso/
+        run: |
+          sudo cp build/chroot/boot/vmlinuz-* build/iso/boot/vmlinuz 2>/dev/null || true
+          sudo cp build/chroot/boot/initrd.img-* build/iso/boot/initrd.img 2>/dev/null || true
+          sudo chown -R $USER:$USER build/iso/
       
-grub.cfg -no-emul-boot -boot-load-size 4 -boot-info-table -output output/TRPars-26.0-Beta-amd64.iso build/iso/
+      - name: GRUB konfigürasyonu
+        run: |
+          cat > build/iso/boot/grub/grub.cfg << 'EOF'
+          set default=0
+          set timeout=10
+          menuentry "TRPars 26.0 Beta Live" {
+            search --no-floppy --label TRPARS --set root
+            echo "Yükleniyor..."
+            linux /boot/vmlinuz boot=live live-media-path=/live noprompt
+            initrd /boot/initrd.img
+          }
+          EOF
+      
+      - name: ISOLINUX konfigürasyonu
+        run: |
+          cp /usr/lib/ISOLINUX/isolinux.bin build/iso/isolinux/
+          cp /usr/lib/syslinux/modules/bios/ldlinux.c32 build/iso/isolinux/ || true
+          cat > build/iso/isolinux/isolinux.cfg << 'EOF'
+          DEFAULT vesamenu.c32
+          TIMEOUT 100
+          PROMPT 0
+          LABEL TRPars
+            MENU LABEL TRPars 26.0 Beta (Live)
+            KERNEL /boot/vmlinuz
+            APPEND boot=live live-media-path=/live initrd=/boot/initrd.img noprompt
+          EOF
+      
+      - name: ISO oluştur (BIOS+UEFI)
+        run: |
+          xorriso -as mkisofs \
+            -iso-level 3 \
+            -full-iso9660-filenames \
+            -volid "TRPARS" \
+            -isohybrid-mbr /usr/lib/ISOLINUX/isohdpfx.bin \
+            -c isolinux/boot.cat \
+            -b isolinux/isolinux.bin \
+            -no-emul-boot \
+            -boot-load-size 4 \
+            -boot-info-table \
+            -eltorito-alt-boot \
+            -e boot/efiboot.img \
+            -no-emul-boot \
+            -isohybrid-gpt-basdat \
+            -output output/TRPars-26.0-Beta-amd64.iso \
+            build/iso/
       
       - name: Checksum oluştur
         run: cd output && sha256sum TRPars-26.0-Beta-amd64.iso > TRPars-26.0-Beta-amd64.iso.sha256
       
       - name: Info dosyası oluştur
         run: |
-          tee output/README.txt > /dev/null << 'READMEEOF'
-          TRPars 26.0 Beta
-          ================
+          cat > output/README.txt << 'EOF'
+          ╔═══════════════════════════════════════════════════════════╗
+          ║         TRPars 26.0 Beta - Linux Dağıtımı                ║
+          ╚═══════════════════════════════════════════════════════════╝
           
-          Dağıtım: Debian 13.2 Tabanlı
-          Masaüstü: Cinnamon
-          Amaç: Linux'a yeni geçenlere kolaylık sağlamak
+          📋 Dağıtım Bilgileri
+          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          • Adı: TRPars
+          • Sürüm: 26.0 Beta
+          • Temel: Debian 13.2 (Trixie)
+          • Masaüstü: Cinnamon
+          • Dil: Türkçe
           
-          Kurulu Yazılımlar:
-          - Chromium (Web tarayıcı)
-          - Thunderbird (E-posta)
-          - VLC (Video oynatıcı)
-          - Gparted (Disk bölümlendirme)
-          - Gedit (Metin editörü)
-          - Nautilus (Dosya yöneticisi)
-          - Synaptic (Paket yöneticisi)
+          🎯 Amaç
+          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          Linux'a yeni geçenlere kolaylık sağlamak
           
-          Varsayılan Kullanıcı: trpars
+          💻 Sistem Gereksinimleri
+          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          • RAM: En az 2 GB
+          • Disk: 20 GB (kurulum için)
+          • Boot: BIOS/UEFI
+          
+          🛠️ Kurulu Yazılımlar
+          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          ✓ Cinnamon (Masaüstü)
+          ✓ Chromium (Web tarayıcı)
+          ✓ Thunderbird (E-posta)
+          ✓ VLC (Video oynatıcı)
+          ✓ Gedit (Metin editörü)
+          ✓ Nautilus (Dosya yöneticisi)
+          ✓ Gparted (Disk bölümlendirme)
+          ✓ Synaptic (Paket yöneticisi)
+          
+          👤 Varsayılan Kullanıcı
+          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          Kullanıcı: trpars
           Şifre: trpars
           
-          Kurulum:
-          1. USB'ye yazın: sudo dd if=TRPars-26.0-Beta-amd64.iso of=/dev/sdX bs=4M
-          2. USB'den boot edin
-          3. Sisteme Kur
-          READMEEOF
+          🚀 Kurulum Adımları
+          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          1. Etcher veya dd ile USB'ye yazın:
+             sudo dd if=TRPars-26.0-Beta-amd64.iso of=/dev/sdX bs=4M
+          
+          2. BIOS/UEFI ayarlarında boot sırasını değiştirin (USB birinci)
+          
+          3. USB'den boot edin
+          
+          4. Canlı ortamda test edin
+          
+          5. "Sisteme Kur" seçeneğini tıklayın
+          
+          ═════════════════════════════════════════════════════════════
+          EOF
       
       - name: Artifacts upload
         uses: actions/upload-artifact@v4
@@ -94,11 +168,11 @@ grub.cfg -no-emul-boot -boot-load-size 4 -boot-info-table -output output/TRPars-
           path: output/
           retention-days: 90
       
-      - name: Özet
+      - name: Build Tamamlandı
         run: |
-          echo "✅ TRPars 26.0 Beta Build Tamamlandı!"
+          echo "✅ TRPars 26.0 Beta Build Başarılı!"
           echo ""
-          echo "📁 Oluşturulan Dosyalar:"
+          echo "📁 Dosyalar:"
           ls -lh output/
           echo ""
           echo "💾 Artifacts'tan indirin"
