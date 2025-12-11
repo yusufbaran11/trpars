@@ -42,17 +42,17 @@ jobs:
         ksvalidator kickstart/trpars.ks
         echo "✓ Doğrulama başarılı"
 
-    - name: Build ISO Image with Fedora Repo
+    - name: Build ISO Image with DNF Repos
       run: |
-        echo "ISO imajı oluşturuluyor (Fedora 43 repo ile)..."
+        echo "ISO imajı oluşturuluyor (DNF repo'ları ile)..."
         set +e
         
         lorax \
           --product=TRPars \
           --version=26.0-Beta \
           --release=26.0-Beta \
-          --repo=fedora \
-          --repo=updates \
+          --enablerepo=fedora \
+          --enablerepo=updates \
           --logfile=/tmp/logs/lorax.log \
           --tmp=/tmp/work \
           --cachedir=/tmp/cache \
@@ -90,17 +90,17 @@ jobs:
     - name: Show Build Logs
       if: always()
       run: |
-        echo "=== Build Log (son 200 satır) ==="
+        echo "=== Build Log (son 300 satır) ==="
         if [ -f /tmp/logs/build.log ]; then
-          tail -200 /tmp/logs/build.log
+          tail -300 /tmp/logs/build.log
         else
           echo "Build log bulunamadı"
         fi
         
         echo ""
-        echo "=== Lorax Log (son 200 satır) ==="
+        echo "=== Lorax Log (son 300 satır) ==="
         if [ -f /tmp/logs/lorax.log ]; then
-          tail -200 /tmp/logs/lorax.log
+          tail -300 /tmp/logs/lorax.log
         else
           echo "Lorax log bulunamadı"
         fi
