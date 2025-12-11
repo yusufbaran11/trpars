@@ -1,0 +1,20 @@
+# Build outputs
+iso_output/
+output/
+*.iso
+*.sha256
+*.md5
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
