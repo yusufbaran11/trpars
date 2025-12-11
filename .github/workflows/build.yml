@@ -23,23 +23,24 @@ jobs:
           git \
           curl
 
-    - name: Create Directories
+    - name: Clean and Prepare Directories
       run: |
-        mkdir -p /tmp/trpars-build
+        echo "Dizinler temizleniyor..."
+        rm -rf /tmp/trpars-build
+        rm -rf /tmp/work
+        rm -rf /tmp/cache
+        rm -rf /tmp/logs
+        
         mkdir -p /tmp/logs
         mkdir -p artifacts
+        
+        echo "✓ Dizinler hazır"
 
     - name: Validate Kickstart
       run: |
         echo "Kickstart dosyası doğrulanıyor..."
         ksvalidator kickstart/trpars.ks
         echo "✓ Doğrulama başarılı"
-
-    - name: Copy Kickstart to Proper Location
-      run: |
-        echo "Kickstart dosyası hazırlanıyor..."
-        cp kickstart/trpars.ks /tmp/trpars.ks
-        ls -lh /tmp/trpars.ks
 
     - name: Build ISO Image
       run: |
@@ -50,14 +51,14 @@ jobs:
           --product=TRPars \
           --version=26.0-Beta \
           --release=26.0-Beta \
-          --repo=https://mirrors.fedoraproject.org/mirrorlist?repo=fedora-43 \
           --logfile=/tmp/logs/lorax.log \
-          --workdir=/tmp/work \
+          --tmp=/tmp/work \
           --cachedir=/tmp/cache \
           /tmp/trpars-build 2>&1 | tee /tmp/logs/build.log
         
         BUILD_STATUS=$?
-        echo "Build status: $BUILD_STATUS"
+        echo ""
+        echo "Build exit code: $BUILD_STATUS"
         set -e
 
     - name: Check Build Output
@@ -65,43 +66,56 @@ jobs:
         echo "Build output kontrol ediliyor..."
         echo ""
         echo "=== /tmp/trpars-build içeriği ==="
-        ls -la /tmp/trpars-build/ || echo "Klasör bulunamadı"
+        ls -lah /tmp/trpars-build/ 2>/dev/null || echo "Klasör bulunamadı"
         
         echo ""
         echo "=== İmaj dosyaları ==="
-        find /tmp/trpars-build -name "*.iso" -type f -ls 2>/dev/null || echo "ISO bulunamadı"
+        find /tmp/trpars-build -name "*.iso" -type f 2>/dev/null | while read file; do
+          ls -lh "$file"
+        done || echo "ISO bulunamadı"
         
         echo ""
-        echo "=== Tüm dosyalar ==="
-        find /tmp/trpars-build -type f -ls 2>/dev/null | head -20
+        echo "=== Tüm dosyalar (ilk 30) ==="
+        find /tmp/trpars-build -type f 2>/dev/null | head -30
 
     - name: Show Build Logs
       if: always()
       run: |
-        echo "=== Build Log (son 100 satır) ==="
-        tail -100 /tmp/logs/build.log 2>/dev/null || echo "Log yok"
+        echo "=== Build Log (son 150 satır) ==="
+        if [ -f /tmp/logs/build.log ]; then
+          tail -150 /tmp/logs/build.log
+        else
+          echo "Build log bulunamadı"
+        fi
         
         echo ""
-        echo "=== Lorax Log (son 100 satır) ==="
-        tail -100 /tmp/logs/lorax.log 2>/dev/null || echo "Log yok"
+        echo "=== Lorax Log (son 150 satır) ==="
+        if [ -f /tmp/logs/lorax.log ]; then
+          tail -150 /tmp/logs/lorax.log
+        else
+          echo "Lorax log bulunamadı"
+        fi
 
-    - name: Copy ISO Files
+    - name: Copy Artifacts
       if: always()
       run: |
-        echo "İmaj dosyaları kopyalanıyor..."
+        echo "Dosyalar kopyalanıyor..."
         
         # Boot.iso'yu ara
         if [ -f "/tmp/trpars-build/images/boot.iso" ]; then
           cp /tmp/trpars-build/images/boot.iso artifacts/
           echo "✓ boot.iso kopyalandı"
+        else
+          echo "⚠ boot.iso bulunamadı"
         fi
         
-        # Tüm ISO dosyalarını ara
-        find /tmp/trpars-build -name "*.iso" -type f -exec cp {} artifacts/ \;
+        # Tüm ISO dosyalarını ara ve kopyala
+        find /tmp/trpars-build -name "*.iso" -type f -exec cp {} artifacts/ \; 2>/dev/null || true
         
         # Log dosyalarını kopyala
         cp /tmp/logs/* artifacts/ 2>/dev/null || true
         
+        echo ""
         echo "Artifact içeriği:"
         ls -lah artifacts/
 
@@ -113,6 +127,7 @@ jobs:
           sha256sum boot.iso > TRPars-26.0-Beta.iso.sha256
           md5sum boot.iso > TRPars-26.0-Beta.iso.md5
           echo "✓ Checksumlar oluşturuldu"
+          ls -lh
         else
           echo "⚠ boot.iso bulunamadı, checksum oluşturulamadı"
         fi
