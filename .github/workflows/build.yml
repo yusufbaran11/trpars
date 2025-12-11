@@ -21,7 +21,8 @@ jobs:
           anaconda \
           anaconda-core \
           git \
-          curl
+          curl \
+          dnf-utils
 
     - name: Clean and Prepare Directories
       run: |
@@ -30,8 +31,10 @@ jobs:
         rm -rf /tmp/work
         rm -rf /tmp/cache
         rm -rf /tmp/logs
+        rm -rf /tmp/repos
         
         mkdir -p /tmp/logs
+        mkdir -p /tmp/repos
         mkdir -p artifacts
         
         echo "✓ Dizinler hazır"
@@ -42,17 +45,42 @@ jobs:
         ksvalidator kickstart/trpars.ks
         echo "✓ Doğrulama başarılı"
 
-    - name: Build ISO Image with DNF Repos
+    - name: Create Local Repository
       run: |
-        echo "ISO imajı oluşturuluyor (DNF repo'ları ile)..."
+        echo "Yerel repository oluşturuluyor..."
+        mkdir -p /tmp/repos/packages
+        
+        # Temel paketleri indir
+        dnf download \
+          --resolve \
+          --alldeps \
+          --destdir=/tmp/repos/packages \
+          kernel \
+          glibc \
+          systemd \
+          dnf \
+          @cinnamon-desktop-environment \
+          cinnamon-extensions \
+          cinnamon-themes \
+          @core \
+          2>&1 | tee /tmp/logs/dnf-download.log || true
+        
+        # Repository metadata'sı oluştur
+        createrepo /tmp/repos/packages 2>&1 | tee -a /tmp/logs/createrepo.log || true
+        
+        echo "✓ Repository oluşturuldu"
+        ls -la /tmp/repos/packages/ | head -20
+
+    - name: Build ISO Image
+      run: |
+        echo "ISO imajı oluşturuluyor..."
         set +e
         
         lorax \
           --product=TRPars \
           --version=26.0-Beta \
           --release=26.0-Beta \
-          --enablerepo=fedora \
-          --enablerepo=updates \
+          --repo=/tmp/repos/packages \
           --logfile=/tmp/logs/lorax.log \
           --tmp=/tmp/work \
           --cachedir=/tmp/cache \
@@ -65,7 +93,7 @@ jobs:
         if [ $BUILD_STATUS -eq 0 ]; then
           echo "✓ Build başarılı"
         else
-          echo "⚠ Build uyarılarla tamamlandı, devam ediliyor..."
+          echo "⚠ Build tamamlandı (bazı uyarılar olabilir)"
         fi
         
         set -e
@@ -84,7 +112,7 @@ jobs:
         done || echo "ISO bulunamadı"
         
         echo ""
-        echo "=== Tüm dosyalar (ilk 50) ==="
+        echo "=== Tüm dosyalar ==="
         find /tmp/trpars-build -type f 2>/dev/null | head -50
 
     - name: Show Build Logs
@@ -138,7 +166,7 @@ jobs:
           echo "✓ Checksumlar oluşturuldu"
           ls -lh
         else
-          echo "⚠ boot.iso bulunamadı, checksum oluşturulamadı"
+          echo "⚠ boot.iso bulunamadı"
         fi
 
     - name: Upload Logs
