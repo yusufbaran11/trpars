@@ -17,22 +17,16 @@ jobs:
         echo "Bağımlılıklar yükleniyor..."
         dnf install -y \
           pykickstart \
-          anaconda \
-          anaconda-core \
+          pungi \
           git \
           curl \
-          wget \
-          xorriso \
-          syslinux \
-          createrepo_c \
-          pungi \
-          lorax
+          createrepo_c
 
     - name: Create Build Directories
       run: |
         echo "Dizinler oluşturuluyor..."
-        rm -rf /tmp/trpars-build /tmp/work /tmp/cache /tmp/logs
-        mkdir -p /tmp/logs /tmp/work /tmp/cache /tmp/repos
+        rm -rf /tmp/trpars-build /tmp/pungi-work /tmp/logs
+        mkdir -p /tmp/logs /tmp/pungi-work
         mkdir -p artifacts
         echo "✓ Hazır"
 
@@ -42,29 +36,65 @@ jobs:
         ksvalidator kickstart/trpars.ks
         echo "✓ Başarılı"
 
-    - name: Setup DNF Cache
+    - name: Create Pungi Configuration
       run: |
-        echo "DNF cache kurulumu..."
-        dnf makecache 2>&1 | tee /tmp/logs/dnf-cache.log
-        echo "✓ Cache hazır"
+        echo "Pungi konfigürasyonu oluşturuluyor..."
+        
+        cat > /tmp/pungi.conf << 'EOF'
+[pungi]
+product_name = TRPars
+version = 26.0
+release_name = Beta
+release_version = 26.0-Beta
 
-    - name: Build ISO with Lorax (Minimal)
+# Output
+output_dir = /tmp/trpars-build
+working_dir = /tmp/pungi-work
+
+# Architecture
+architectures = x86_64
+
+# Variants
+variants = Server,Client
+
+# Repository
+pkgset_source = koji
+koji_profile = koji
+
+# Buildinstall
+buildinstall_method = lorax
+
+# Images
+create_iso = True
+create_unified_iso = False
+create_jigdo = False
+
+[variant-Server]
+name = Server
+type = variant
+uid = Server
+
+[variant-Client]
+name = Client
+type = variant
+uid = Client
+EOF
+        
+        cat /tmp/pungi.conf
+
+    - name: Build with Pungi
       run: |
-        echo "ISO oluşturuluyor..."
+        echo "Pungi ile ISO oluşturuluyor..."
         set +e
         
-        # Lorax komutu - minimal ama çalışan
-        lorax \
-          --product=TRPars \
-          --version=26.0-Beta \
-          --release=26.0-Beta \
-          --logfile=/tmp/logs/lorax.log \
-          --tmp=/tmp/work \
-          --cachedir=/tmp/cache \
-          /tmp/trpars-build 2>&1 | tee /tmp/logs/build.log
+        pungi-koji \
+          --config /tmp/pungi.conf \
+          --logdir /tmp/logs \
+          2>&1 | tee /tmp/logs/pungi-build.log
         
         BUILD_STATUS=$?
-        echo "Build status: $BUILD_STATUS"
+        echo ""
+        echo "Pungi exit code: $BUILD_STATUS"
         set -e
 
     - name: Check Output
@@ -79,41 +109,41 @@ jobs:
         find /tmp/trpars-build -name "*.iso" -type f -ls 2>/dev/null || echo "ISO yok"
         
         echo ""
-        echo "=== İmaj klasörü ==="
-        ls -la /tmp/trpars-build/images/ 2>/dev/null || echo "images/ yok"
+        echo "=== Tüm dosyalar ==="
+        find /tmp/trpars-build -type f 2>/dev/null | head -30
 
     - name: Show Logs
       if: always()
       run: |
-        echo "=== LAST 400 LINES OF BUILD LOG ==="
-        tail -400 /tmp/logs/build.log 2>/dev/null || echo "Log yok"
+        echo "=== Build Log (son 300 satır) ==="
+        tail -300 /tmp/logs/pungi-build.log 2>/dev/null || echo "Log yok"
 
     - name: Copy ISO
       if: always()
       run: |
         echo "ISO kopyalanıyor..."
         
-        if [ -f "/tmp/trpars-build/images/boot.iso" ]; then
-          cp /tmp/trpars-build/images/boot.iso artifacts/TRPars-26.0-Beta.iso
-          echo "✓ ISO kopyalandı"
-          ls -lh artifacts/
-        else
-          echo "⚠ boot.iso bulunamadı"
-        fi
+        # ISO'yu ara ve kopyala
+        find /tmp/trpars-build -name "*.iso" -type f -exec cp {} artifacts/ \;
         
         # Log'ları da kopyala
         cp /tmp/logs/* artifacts/ 2>/dev/null || true
+        
+        echo "Artifact içeriği:"
+        ls -lah artifacts/
 
     - name: Generate Checksums
       if: always()
       run: |
-        if [ -f "artifacts/TRPars-26.0-Beta.iso" ]; then
-          cd artifacts
-          sha256sum TRPars-26.0-Beta.iso > TRPars-26.0-Beta.iso.sha256
-          md5sum TRPars-26.0-Beta.iso > TRPars-26.0-Beta.iso.md5
-          echo "✓ Checksumlar oluşturuldu"
-          ls -lh
-        fi
+        cd artifacts
+        for iso in *.iso; do
+          if [ -f "$iso" ]; then
+            sha256sum "$iso" > "$iso.sha256"
+            md5sum "$iso" > "$iso.md5"
+            echo "✓ $iso için checksumlar oluşturuldu"
+          fi
+        done
+        ls -lh *.iso* 2>/dev/null || echo "ISO yok"
 
     - name: Upload Logs
       if: always()
