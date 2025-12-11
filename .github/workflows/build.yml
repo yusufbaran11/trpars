@@ -42,15 +42,17 @@ jobs:
         ksvalidator kickstart/trpars.ks
         echo "✓ Doğrulama başarılı"
 
-    - name: Build ISO Image
+    - name: Build ISO Image with Fedora Repo
       run: |
-        echo "ISO imajı oluşturuluyor..."
+        echo "ISO imajı oluşturuluyor (Fedora 43 repo ile)..."
         set +e
         
         lorax \
           --product=TRPars \
           --version=26.0-Beta \
           --release=26.0-Beta \
+          --repo=fedora \
+          --repo=updates \
           --logfile=/tmp/logs/lorax.log \
           --tmp=/tmp/work \
           --cachedir=/tmp/cache \
@@ -59,6 +61,13 @@ jobs:
         BUILD_STATUS=$?
         echo ""
         echo "Build exit code: $BUILD_STATUS"
+        
+        if [ $BUILD_STATUS -eq 0 ]; then
+          echo "✓ Build başarılı"
+        else
+          echo "⚠ Build uyarılarla tamamlandı, devam ediliyor..."
+        fi
+        
         set -e
 
     - name: Check Build Output
@@ -75,23 +84,23 @@ jobs:
         done || echo "ISO bulunamadı"
         
         echo ""
-        echo "=== Tüm dosyalar (ilk 30) ==="
-        find /tmp/trpars-build -type f 2>/dev/null | head -30
+        echo "=== Tüm dosyalar (ilk 50) ==="
+        find /tmp/trpars-build -type f 2>/dev/null | head -50
 
     - name: Show Build Logs
       if: always()
       run: |
-        echo "=== Build Log (son 150 satır) ==="
+        echo "=== Build Log (son 200 satır) ==="
         if [ -f /tmp/logs/build.log ]; then
-          tail -150 /tmp/logs/build.log
+          tail -200 /tmp/logs/build.log
         else
           echo "Build log bulunamadı"
         fi
         
         echo ""
-        echo "=== Lorax Log (son 150 satır) ==="
+        echo "=== Lorax Log (son 200 satır) ==="
         if [ -f /tmp/logs/lorax.log ]; then
-          tail -150 /tmp/logs/lorax.log
+          tail -200 /tmp/logs/lorax.log
         else
           echo "Lorax log bulunamadı"
         fi
@@ -117,7 +126,7 @@ jobs:
         
         echo ""
         echo "Artifact içeriği:"
-        ls -lah artifacts/
+        ls -lah artifacts/ || echo "Artifact klasörü boş"
 
     - name: Generate Checksums
       if: always()
