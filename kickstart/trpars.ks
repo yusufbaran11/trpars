@@ -19,8 +19,8 @@ bootloader --location=mbr --timeout=5
 # Installation medium
 url --mirrorlist=https://mirrors.fedoraproject.org/mirrorlist?repo=fedora-$releasever&arch=$basearch
 
-# System timezone
-timezone Europe/Istanbul --isUtc=False
+# System timezone (--isUtc removed - deprecated)
+timezone Europe/Istanbul
 
 # Root password (locked)
 rootpw --lock
@@ -178,7 +178,7 @@ cat > /etc/motd << 'EOF'
 ╔════════════════════════════════════════╗
 ║     TRPars Linux 26.0 Beta             ║
 ║  Linux Yeni Başlayanlar İçin           ║
-║                                        ║
+║                                        ║"
 ║  Hoşgeldiniz! Linux yolculuğunuzda     ║
 ║  başarılar dileriz.                    ║
 ╚════════════════════════════════════════╝
@@ -186,9 +186,6 @@ EOF
 
 # Set keyboard layout permanently
 localectl set-x11-keymap tr
-
-# Disable SELinux for better beginner experience (optional)
-# semanage permissive -a cinnamon_t
 
 %end
 
