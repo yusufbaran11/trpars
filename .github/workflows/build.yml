@@ -10,37 +10,48 @@ jobs:
       image: fedora:43
     
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Install Dependencies
-      run: dnf install -y pykickstart git curl
+      - name: Install Dependencies
+        run: |
+          dnf install -y pykickstart git curl
 
-    - name: Create Directories
-      run: |
-        mkdir -p /tmp/logs
-        mkdir -p artifacts
+      - name: Create Directories
+        run: |
+          mkdir -p /tmp/logs
+          mkdir -p artifacts
 
-    - name: Validate Kickstart
-      run: ksvalidator kickstart/trpars.ks
+      - name: Validate Kickstart
+        run: |
+          ksvalidator kickstart/trpars.ks
 
-    - name: Show Status
-      run: |
-        echo "Build baslatildi"
-        date
-        pwd
+      - name: Create Boot Media Script
+        run: |
+          cat > /tmp/create_iso.sh << 'SCRIPT'
+          #!/bin/bash
+          echo "ISO oluşturmak için hazırlık yapılıyor..."
+          mkdir -p /tmp/iso-build
+          touch /tmp/iso-build/test.txt
+          echo "TRPars 26.0 Beta ISO Build" > /tmp/iso-build/test.txt
+          SCRIPT
+          chmod +x /tmp/create_iso.sh
+          /tmp/create_iso.sh
 
-    - name: Create Test File
-      run: echo "Test icerik" > artifacts/test.txt
+      - name: Copy Build Output
+        run: |
+          if [ -f "/tmp/iso-build/test.txt" ]; then
+            cp /tmp/iso-build/* artifacts/ 2>/dev/null || true
+          fi
 
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: Test-Artifacts
-        path: artifacts/
-        retention-days: 30
+      - name: Create Summary
+        run: |
+          echo "Build tamamlandi"
+          ls -la artifacts/
 
-    - name: Summary
-      run: |
-        echo ""
-        echo "Build tamamlandi"
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: TRPars-26.0-Beta-Build
+          path: artifacts/
+          retention-days: 90
