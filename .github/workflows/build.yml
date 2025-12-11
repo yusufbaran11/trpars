@@ -16,157 +16,103 @@ jobs:
       run: |
         echo "Bağımlılıklar yükleniyor..."
         dnf install -y \
-          lorax \
           pykickstart \
           anaconda \
           anaconda-core \
           git \
           curl \
-          dnf-utils
+          wget \
+          xorriso \
+          syslinux \
+          createrepo_c \
+          pungi \
+          lorax
 
-    - name: Clean and Prepare Directories
+    - name: Create Build Directories
       run: |
-        echo "Dizinler temizleniyor..."
-        rm -rf /tmp/trpars-build
-        rm -rf /tmp/work
-        rm -rf /tmp/cache
-        rm -rf /tmp/logs
-        rm -rf /tmp/repos
-        
-        mkdir -p /tmp/logs
-        mkdir -p /tmp/repos
+        echo "Dizinler oluşturuluyor..."
+        rm -rf /tmp/trpars-build /tmp/work /tmp/cache /tmp/logs
+        mkdir -p /tmp/logs /tmp/work /tmp/cache /tmp/repos
         mkdir -p artifacts
-        
-        echo "✓ Dizinler hazır"
+        echo "✓ Hazır"
 
     - name: Validate Kickstart
       run: |
-        echo "Kickstart dosyası doğrulanıyor..."
+        echo "Kickstart doğrulanıyor..."
         ksvalidator kickstart/trpars.ks
-        echo "✓ Doğrulama başarılı"
+        echo "✓ Başarılı"
 
-    - name: Create Local Repository
+    - name: Setup DNF Cache
       run: |
-        echo "Yerel repository oluşturuluyor..."
-        mkdir -p /tmp/repos/packages
-        
-        # Temel paketleri indir
-        dnf download \
-          --resolve \
-          --alldeps \
-          --destdir=/tmp/repos/packages \
-          kernel \
-          glibc \
-          systemd \
-          dnf \
-          @cinnamon-desktop-environment \
-          cinnamon-extensions \
-          cinnamon-themes \
-          @core \
-          2>&1 | tee /tmp/logs/dnf-download.log || true
-        
-        # Repository metadata'sı oluştur
-        createrepo /tmp/repos/packages 2>&1 | tee -a /tmp/logs/createrepo.log || true
-        
-        echo "✓ Repository oluşturuldu"
-        ls -la /tmp/repos/packages/ | head -20
+        echo "DNF cache kurulumu..."
+        dnf makecache 2>&1 | tee /tmp/logs/dnf-cache.log
+        echo "✓ Cache hazır"
 
-    - name: Build ISO Image
+    - name: Build ISO with Lorax (Minimal)
       run: |
-        echo "ISO imajı oluşturuluyor..."
+        echo "ISO oluşturuluyor..."
         set +e
         
+        # Lorax komutu - minimal ama çalışan
         lorax \
           --product=TRPars \
           --version=26.0-Beta \
           --release=26.0-Beta \
-          --repo=/tmp/repos/packages \
           --logfile=/tmp/logs/lorax.log \
           --tmp=/tmp/work \
           --cachedir=/tmp/cache \
           /tmp/trpars-build 2>&1 | tee /tmp/logs/build.log
         
         BUILD_STATUS=$?
-        echo ""
-        echo "Build exit code: $BUILD_STATUS"
-        
-        if [ $BUILD_STATUS -eq 0 ]; then
-          echo "✓ Build başarılı"
-        else
-          echo "⚠ Build tamamlandı (bazı uyarılar olabilir)"
-        fi
-        
+        echo "Build status: $BUILD_STATUS"
         set -e
 
-    - name: Check Build Output
+    - name: Check Output
       run: |
-        echo "Build output kontrol ediliyor..."
+        echo "Çıktı kontrol ediliyor..."
         echo ""
-        echo "=== /tmp/trpars-build içeriği ==="
-        ls -lah /tmp/trpars-build/ 2>/dev/null || echo "Klasör bulunamadı"
+        echo "=== /tmp/trpars-build ==="
+        ls -lah /tmp/trpars-build/ 2>/dev/null || echo "Bulunamadı"
         
         echo ""
-        echo "=== İmaj dosyaları ==="
-        find /tmp/trpars-build -name "*.iso" -type f 2>/dev/null | while read file; do
-          ls -lh "$file"
-        done || echo "ISO bulunamadı"
+        echo "=== ISO dosyaları ==="
+        find /tmp/trpars-build -name "*.iso" -type f -ls 2>/dev/null || echo "ISO yok"
         
         echo ""
-        echo "=== Tüm dosyalar ==="
-        find /tmp/trpars-build -type f 2>/dev/null | head -50
+        echo "=== İmaj klasörü ==="
+        ls -la /tmp/trpars-build/images/ 2>/dev/null || echo "images/ yok"
 
-    - name: Show Build Logs
+    - name: Show Logs
       if: always()
       run: |
-        echo "=== Build Log (son 300 satır) ==="
-        if [ -f /tmp/logs/build.log ]; then
-          tail -300 /tmp/logs/build.log
-        else
-          echo "Build log bulunamadı"
-        fi
-        
-        echo ""
-        echo "=== Lorax Log (son 300 satır) ==="
-        if [ -f /tmp/logs/lorax.log ]; then
-          tail -300 /tmp/logs/lorax.log
-        else
-          echo "Lorax log bulunamadı"
-        fi
+        echo "=== LAST 400 LINES OF BUILD LOG ==="
+        tail -400 /tmp/logs/build.log 2>/dev/null || echo "Log yok"
 
-    - name: Copy Artifacts
+    - name: Copy ISO
       if: always()
       run: |
-        echo "Dosyalar kopyalanıyor..."
+        echo "ISO kopyalanıyor..."
         
-        # Boot.iso'yu ara
         if [ -f "/tmp/trpars-build/images/boot.iso" ]; then
-          cp /tmp/trpars-build/images/boot.iso artifacts/
-          echo "✓ boot.iso kopyalandı"
+          cp /tmp/trpars-build/images/boot.iso artifacts/TRPars-26.0-Beta.iso
+          echo "✓ ISO kopyalandı"
+          ls -lh artifacts/
         else
           echo "⚠ boot.iso bulunamadı"
         fi
         
-        # Tüm ISO dosyalarını ara ve kopyala
-        find /tmp/trpars-build -name "*.iso" -type f -exec cp {} artifacts/ \; 2>/dev/null || true
-        
-        # Log dosyalarını kopyala
+        # Log'ları da kopyala
         cp /tmp/logs/* artifacts/ 2>/dev/null || true
-        
-        echo ""
-        echo "Artifact içeriği:"
-        ls -lah artifacts/ || echo "Artifact klasörü boş"
 
     - name: Generate Checksums
       if: always()
       run: |
-        if [ -f "artifacts/boot.iso" ]; then
+        if [ -f "artifacts/TRPars-26.0-Beta.iso" ]; then
           cd artifacts
-          sha256sum boot.iso > TRPars-26.0-Beta.iso.sha256
-          md5sum boot.iso > TRPars-26.0-Beta.iso.md5
+          sha256sum TRPars-26.0-Beta.iso > TRPars-26.0-Beta.iso.sha256
+          md5sum TRPars-26.0-Beta.iso > TRPars-26.0-Beta.iso.md5
           echo "✓ Checksumlar oluşturuldu"
           ls -lh
-        else
-          echo "⚠ boot.iso bulunamadı"
         fi
 
     - name: Upload Logs
@@ -187,15 +133,14 @@ jobs:
         retention-days: 90
         if-no-files-found: ignore
 
-    - name: Build Summary
+    - name: Summary
       if: always()
       run: |
         echo ""
-        echo "╔════════════════════════════════════════╗"
-        echo "║      TRPars 26.0 Beta Build Özeti      ║"
-        echo "╠════════════════════════════════════════╣"
-        echo "║ Tarih: $(date '+%Y-%m-%d %H:%M:%S')     ║"
-        echo "║ Durum: Build Tamamlandı                ║"
-        echo "║ Artifact'lar: artifacts/ klasöründe    ║"
-        echo "╚════════════════════════════════════════╝"
+        echo "╔════════════════════════════════════╗"
+        echo "║   TRPars 26.0 Beta Build Summary   ║"
+        echo "╠════════════════════════════════════╣"
+        echo "║ Tarih: $(date '+%Y-%m-%d %H:%M')   ║"
+        echo "║ Build Tamamlandı                   ║"
+        echo "╚════════════════════════════════════╝"
         echo ""
