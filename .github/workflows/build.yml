@@ -15,10 +15,12 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          dnf install -y pykickstart git curl
+          dnf install -y pykickstart lorax git curl
 
       - name: Create Directories
         run: |
+          rm -rf /tmp/trpars-build
+          mkdir -p /tmp/trpars-build
           mkdir -p /tmp/logs
           mkdir -p artifacts
 
@@ -26,32 +28,53 @@ jobs:
         run: |
           ksvalidator kickstart/trpars.ks
 
-      - name: Create Boot Media Script
+      - name: Build ISO with Lorax
         run: |
-          cat > /tmp/create_iso.sh << 'SCRIPT'
-          #!/bin/bash
-          echo "ISO oluşturmak için hazırlık yapılıyor..."
-          mkdir -p /tmp/iso-build
-          touch /tmp/iso-build/test.txt
-          echo "TRPars 26.0 Beta ISO Build" > /tmp/iso-build/test.txt
-          SCRIPT
-          chmod +x /tmp/create_iso.sh
-          /tmp/create_iso.sh
+          lorax \
+            --product=TRPars \
+            --version=26.0-Beta \
+            --release=26.0-Beta \
+            --logfile=/tmp/logs/lorax.log \
+            /tmp/trpars-build 2>&1 | tee /tmp/logs/build.log
 
-      - name: Copy Build Output
+      - name: Check ISO Files
         run: |
-          if [ -f "/tmp/iso-build/test.txt" ]; then
-            cp /tmp/iso-build/* artifacts/ 2>/dev/null || true
+          echo "ISO dosyaları kontrol ediliyor..."
+          find /tmp/trpars-build -name "*.iso" -type f -ls
+          ls -lah /tmp/trpars-build/images/
+
+      - name: Copy ISO to Artifacts
+        run: |
+          if [ -f "/tmp/trpars-build/images/boot.iso" ]; then
+            cp /tmp/trpars-build/images/boot.iso artifacts/TRPars-26.0-Beta.iso
+            echo "ISO kopyalandi"
           fi
 
-      - name: Create Summary
+      - name: Generate Checksums
         run: |
-          echo "Build tamamlandi"
-          ls -la artifacts/
+          if [ -f "artifacts/TRPars-26.0-Beta.iso" ]; then
+            cd artifacts
+            sha256sum TRPars-26.0-Beta.iso > TRPars-26.0-Beta.iso.sha256
+            md5sum TRPars-26.0-Beta.iso > TRPars-26.0-Beta.iso.md5
+          fi
+
+      - name: Copy Logs
+        if: always()
+        run: |
+          cp /tmp/logs/* artifacts/ 2>/dev/null || true
 
       - name: Upload Artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: TRPars-26.0-Beta-Build
+          name: TRPars-26.0-Beta-ISO
           path: artifacts/
           retention-days: 90
+
+      - name: Build Summary
+        if: always()
+        run: |
+          echo "========================"
+          echo "TRPars 26.0 Beta Build"
+          echo "========================"
+          ls -lah artifacts/
