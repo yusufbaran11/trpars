@@ -1,0 +1,83 @@
+name: TRPars Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_name:
+        description: 'Build adı (opsiyonel)'
+        required: false
+        default: 'Manual Build'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:43
+    
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Install Dependencies
+      run: |
+        dnf install -y \
+          lorax \
+          pykickstart \
+          anaconda-tui \
+          git \
+          curl
+
+    - name: Validate Kickstart
+      run: |
+        echo "Kickstart dosyası doğrulanıyor..."
+        ksvalidator kickstart/trpars.ks
+        echo "✓ Doğrulama başarılı!"
+
+    - name: Build ISO Image
+      run: |
+        echo "ISO imajı oluşturuluyor..."
+        mkdir -p output
+        lorax \
+          -p "TRPars" \
+          -v "26.0-Beta" \
+          -r "26.0-Beta" \
+          --ks kickstart/trpars.ks \
+          -o output/ \
+          ./iso_output
+        echo "✓ ISO oluşturuldu!"
+
+    - name: Generate Checksums
+      run: |
+        cd iso_output/images
+        sha256sum boot.iso > TRPars-26.0-Beta.iso.sha256
+        md5sum boot.iso > TRPars-26.0-Beta.iso.md5
+        ls -lh boot.iso
+
+    - name: Upload Build Log
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: Build Logs
+        path: |
+          iso_output/logs/
+        retention-days: 14
+
+    - name: Upload ISO Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: TRPars-26.0-Beta-ISO
+        path: |
+          iso_output/images/boot.iso
+          iso_output/images/*.sha256
+          iso_output/images/*.md5
+        retention-days: 90
+
+    - name: Build Summary
+      if: always()
+      run: |
+        echo "╔════════════════════════════════════╗"
+        echo "║   TRPars Build Özeti                ║"
+        echo "╠════════════════════════════════════╣"
+        echo "║ Sürüm: 26.0 Beta                   ║"
+        echo "║ Tarih: $(date '+%Y-%m-%d %H:%M')   ║"
+        echo "╚════════════════════════════════════╝"
