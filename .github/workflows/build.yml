@@ -27,6 +27,12 @@ jobs:
           git \
           curl
 
+    - name: Create Build Directories
+      run: |
+        mkdir -p output
+        mkdir -p iso_output/logs
+        mkdir -p artifacts
+
     - name: Validate Kickstart
       run: |
         echo "Kickstart dosyası doğrulanıyor..."
@@ -36,29 +42,42 @@ jobs:
     - name: Build ISO Image
       run: |
         echo "ISO imajı oluşturuluyor..."
-        mkdir -p output
         lorax \
           -p "TRPars" \
           -v "26.0-Beta" \
           -r "26.0-Beta" \
           --ks kickstart/trpars.ks \
           -o output/ \
-          ./iso_output
+          ./iso_output 2>&1 | tee iso_output/logs/build.log
         echo "✓ ISO oluşturuldu!"
+
+    - name: Check ISO File
+      run: |
+        if [ -f "iso_output/images/boot.iso" ]; then
+          echo "✓ ISO dosyası başarıyla oluşturuldu"
+          ls -lh iso_output/images/boot.iso
+        else
+          echo "✗ ISO dosyası bulunamadı!"
+          ls -la iso_output/
+          exit 1
+        fi
 
     - name: Generate Checksums
       run: |
         cd iso_output/images
         sha256sum boot.iso > TRPars-26.0-Beta.iso.sha256
         md5sum boot.iso > TRPars-26.0-Beta.iso.md5
-        ls -lh boot.iso
+        echo "✓ Checksumlar oluşturuldu"
+        ls -lh
 
     - name: Prepare Artifacts
       run: |
-        mkdir -p artifacts
-        cp iso_output/images/boot.iso artifacts/
-        cp iso_output/images/*.sha256 artifacts/
-        cp iso_output/images/*.md5 artifacts/
+        echo "Artifact'lar hazırlanıyor..."
+        cp iso_output/images/boot.iso artifacts/ || true
+        cp iso_output/images/*.sha256 artifacts/ || true
+        cp iso_output/images/*.md5 artifacts/ || true
+        cp iso_output/logs/* artifacts/ || true
+        ls -la artifacts/
 
     - name: Upload Build Logs
       if: always()
@@ -67,7 +86,7 @@ jobs:
         name: Build-Logs
         path: iso_output/logs/
         retention-days: 14
-        compression-level: 9
+        if-no-files-found: ignore
 
     - name: Upload ISO and Checksums
       uses: actions/upload-artifact@v4
@@ -75,11 +94,12 @@ jobs:
         name: TRPars-26.0-Beta-ISO
         path: artifacts/
         retention-days: 90
-        compression-level: 6
+        if-no-files-found: error
 
     - name: Build Summary
       if: always()
       run: |
+        echo ""
         echo "╔════════════════════════════════════╗"
         echo "║   TRPars Build Özeti                ║"
         echo "╠════════════════════════════════════╣"
@@ -87,3 +107,4 @@ jobs:
         echo "║ Tarih: $(date '+%Y-%m-%d %H:%M')   ║"
         echo "║ Status: Build Tamamlandı           ║"
         echo "╚════════════════════════════════════╝"
+        echo ""
